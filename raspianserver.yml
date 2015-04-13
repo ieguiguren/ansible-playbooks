@@ -1,0 +1,26 @@
+--- # Palybook para configurar el raspserver
+    - hosts: server
+      user: pi
+      sudo: True
+      tasks:
+        #Exports public key
+        - name: create ssh directory
+          file: dest=/home/pi/.ssh state=directory owner=pi group=pi mode=700
+        - name: insert public key
+          copy: src=/home/xir/.ssh/id_rsa.pub dest=/home/pi/.ssh/authorized_keys force=yes owner=pi group=pi mode=600
+        #Workaround to install apt-python
+        - name: install apt-python
+          command: apt-get update 
+          command: apt-get install python-apt -y -q
+         # Installs old version apt's pip 
+        - name: install python pip
+          apt: pkg=python-pip state=latest update_cache=yes
+        # Updates pip tto latest version
+        - name: update pip
+          pip: name=pip state=latest
+        # Installs tweety
+        - name: install tweepy
+          pip: name=tweepy state=latest
+        # Remove garbage from Raspbian installation
+        - name: delete python games
+          file: dest=/home/pi/python_games force=yes state=absent
