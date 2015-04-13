@@ -1,0 +1,16 @@
+--- # Palybook para configurar el raspserver
+    - hosts: server
+      user: pi
+      sudo: True
+      tasks:
+        - name: insert public key
+          file: dest=/home/pi/.ssh state=directory owner=pi group=pi mode=700
+          copy: src=/home/xir/.ssh/id_rsa.pub dest=/home/pi/.ssh/authorized_keys force=yes owner=pi group=pi mode=600
+        - name: install python pip
+          apt: pkg=python-pip state=latest update_cache=yes
+        - name: update pip
+          pip: name=pip state=latest
+        - name: install tweepy
+          pip: name=tweepy state=latest
+        - name: delete python games
+          file: dest=/home/pi/python_games force=yes state=absent
