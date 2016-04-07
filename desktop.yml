@@ -1,0 +1,47 @@
+--- 
+    - hosts: nuevo
+      user: xir
+      become: True
+      vars:
+        - ansible_become_pass: yourpass
+      tasks:
+        - name: update all packages
+          apt: update_cache=yes upgrade=dist
+        - name: set timezone
+          command: cp /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+        # install usefull packages
+        - name: install virtualbox key
+          apt_key: state=present url=https://www.virtualbox.org/download/oracle_vbox.asc
+        - name: install virtualbox repo
+          apt_repository: update_cache=yes state=present repo="deb http://download.virtualbox.org/virtualbox/debian trusty contrib"
+        - name: apt files
+          apt: pkg={{ item }} state=latest
+          with_items:
+            - screen
+            - terminator
+            - git
+            - vim
+            - python-apt
+            - dkms
+            - virtualbox-5.0
+            - android-tools-adb
+        - name: remove unuseful packages
+          apt: pkg={{ item }} state=absent
+          with_items:
+            - nano
+         # Installs old apt's version for pip 
+        - name: install python pip
+          apt: pkg=python-pip state=latest
+        # Updates pip to latest version
+        - name: update pip
+          pip: name=pip state=latest
+        - name: configure terminal
+          git: clone=yes repo="https://github.com/ieguiguren/dotfiles.git" dest="/home/xir/dotfiles"
+        - name: create links
+          command: ln -sb {{ item }} . chdir="/home/xir/" 
+          with_items:
+           - "dotfiles/.bash_profile"
+           - "dotfiles/.bashrc"
+           - "dotfiles/.bashrc_custom"
+           - "dotfiles/.bash_aliases"
+           - "dotfiles/.vimrc"
